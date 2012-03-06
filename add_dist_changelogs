@@ -26,11 +26,11 @@ update_log(){
 # add the changelogs and commit the changes
 commit(){
   git add debian/changelog
-  git commit -a -m "Update debian/changelog"
+  git checkoutmmit -a -m "Update debian/changelog"
 }
 
-
 # error routine
+# args
 # 1. submodule with error
 # 2. error string to write
 error(){
@@ -41,9 +41,9 @@ error(){
 # check if a git branch exists for submodule. Switch
 # to upstream first to avoid file/branch ambiguity on
 # debian branches
-# arg:
-# 1. branch to check checkout
 # returns 1 if branch does not exist or error occurred
+# args:
+# 1. branch to check checkout
 switch_to_branch(){
   git checkout upstream
   git checkout '${1}' >/dev/null 2>&1
@@ -78,7 +78,7 @@ for dir in "${MODULE_DIRS}" ; do
   cd $dir
   switch_to_branch "debian"
   if [ $? -eq 0 ] ; then
-    if (`branch_exists '${BASE_DIST}'`)
+    if (`branch_exists '${BASE_DIST}'`) ; then
       error "{$dir}" "Both debian and '${BASE_DIST}' branches exist"
     else
       # update log
@@ -104,19 +104,20 @@ for dir in "${MODULE_DIRS}" ; do
       if (`switch_to_branch "${BASE_DIST}"`) ; then
         git reset --hard
         git pull origin "${BASE_DIST}"
-        git co -b "${NEW_DIST}"
+        git checkout -b "${NEW_DIST}"
         if [ $? -eq 0 ] ; then
           dists="${NEW_DIST}"
           update_log "${dists}"
           commit
           # git push "origin" '${NEW_DIST}'
         else
-          error "${dir}" "git co -b failed. Unable to create new branch '${NEW_DIST}'"
+          error "${dir}" "git checkout -b failed. Unable to create new branch '${NEW_DIST}'"
         fi
       else
-        error "${dir}" "git co failed. Unabled to switch to base branch '${BASE_DIST}'"
+        error "${dir}" "git checkout failed. Unabled to switch to base branch '${BASE_DIST}'"
       fi
     fi
   fi
+done
 
 
