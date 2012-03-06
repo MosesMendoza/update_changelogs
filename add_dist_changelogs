@@ -75,7 +75,7 @@ branch_exists(){
 # to dist-specific branch, $2. Create a new branch for new dist, $1. Once on new branch
 # modify changelog.
 
-for dir in "${MODULE_DIRS}" ; do
+for dir in `ls -d */` ; do
   cd $dir
   echo "Checking submodule $dir"
   switch_to_branch "debian"
