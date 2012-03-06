@@ -45,7 +45,7 @@ error(){
 # args:
 # 1. branch to check checkout
 switch_to_branch(){
-  echo "Switching to branch $1"
+  #echo "Switching to branch $1"
   git checkout upstream
   git checkout $1
   branch=`git branch | grep \* | awk '{print $NF}'`
