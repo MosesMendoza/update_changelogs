@@ -79,6 +79,7 @@ for dir in `ls -d */` ; do
   echo "current directory:"
   echo `pwd`
   cd $dir
+  git reset --hard
   echo "Checking submodule $dir"
   switch_to_branch "debian"
   if [ $? -eq 0 ] ; then
@@ -87,18 +88,18 @@ for dir in `ls -d */` ; do
       error "{$dir}" "Both debian and '${BASE_DIST}' branches exist"
     else
       # update log
-      git reset --hard
       git pull origin debian
       cd debian
       cat changelog | grep "$NEW_DIST"
       if [ $? -eq 1 ] ; then
         dists="lenny lucid squeeze '${NEW_DIST}'"
+        echo "updating log with $dists"
         update_log "${dists}"
+        cd ..
+        commit
       else
         echo "'${NEW_DIST}' already in changelog for '${dir}'"
-      cd ..
-      commit
-      #git push origin debian
+        cd ..
       fi
       cd ..
     fi
@@ -108,13 +109,13 @@ for dir in `ls -d */` ; do
       echo "Branch '${NEW_DIST}' already exists for '${dir}'"
       cd ..
     else
-if (`switch_to_branch $BASE_DIST`) ; then
-        git reset --hard
+      if (`switch_to_branch $BASE_DIST`) ; then
         git pull origin "${BASE_DIST}"
         git checkout -b "${NEW_DIST}"
         if [ $? -eq 0 ] ; then
           cd debian
           dists="${NEW_DIST}"
+          echo "Updating log with $dists"
           update_log "${dists}"
           commit
           cd ..
