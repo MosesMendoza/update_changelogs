@@ -49,10 +49,16 @@ done
 while read line ; do
   cd "$line"/
   git co "${2}"
-  git co -b "${1}"
-  dists="{$1}"
-  update_log "${dists}" 
-  commit
+  # before making a new branch, make sure the switch was successful
+  branch=`git branch | grep \* | awk '{print $NF}'`
+  if [ $branch = "$2" ] ; then
+    git co -b "${1}"
+    dists="{$1}"
+    update_log "${dists}" 
+    commit
+  else
+    echo "Unable to switch '${line}' to branch '${1}'. Make sure branch exists."
+  fi
   cd ..
 done < pkgs_no_deb_branch 
 
