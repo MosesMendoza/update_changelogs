@@ -76,13 +76,14 @@ branch_exists(){
 
 for dir in "${MODULE_DIRS}" ; do
   cd $dir
-  git reset --hard
   switch_to_branch "debian"
   if [ $? -eq 0 ] ; then
     if (`branch_exists '${BASE_DIST}'`)
       error "{$dir}" "Both debian and '${BASE_DIST}' branches exist"
     else
       # update log
+      git reset --hard
+      git pull origin debian
       cd debian
       cat changelog | grep "${NEW_DIST}"
       if [ $? -eq 1 ] ; then
@@ -101,6 +102,8 @@ for dir in "${MODULE_DIRS}" ; do
       echo "Branch '${NEW_DIST}' already exists for '${dir}'"
     else
       if (`switch_to_branch "${BASE_DIST}"`) ; then
+        git reset --hard
+        git pull origin "${BASE_DIST}"
         git co -b "${NEW_DIST}"
         if [ $? -eq 0 ] ; then
           dists="${NEW_DIST}"
