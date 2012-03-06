@@ -1,0 +1,78 @@
+#/bin/sh
+ 
+# script to update changelogs in submodules
+# to include a new distribution
+# arguments:
+# 1. the name of the new dist, e.g. precise
+# 2. the name of the branch off which to base new branch-specific builds
+
+# update a changelog
+# arguments:
+# 1. the dists string to add to the log
+
+update_log(){
+  message=`git log --oneline --no-merges -n1 --no-decorate --no-color --format="%s"`  
+  dist=$1
+  dhc --force-distribution -D "${dist}" -l puppet $message
+}
+
+# add the changelogs and commit the changes
+commit(){
+  git add debian/changelog
+  git commit -a -m "Update debian/changelog"
+}
+
+# first, get all submodules onto the debian branch, if they have one
+# make lists of submodules on the debian branch, and those without one
+module_dirs=`ls -d */`
+for dir in $module_dirs ; do
+  cd $dir
+  git reset --hard
+  git co upstream
+  git co debian
+  branch=`git branch | grep \* | awk '{print $NF}'`
+  if [ $branch = "debian" ] ; then
+    echo "$dir moved to branch $branch"
+    echo "$dir" >> ../pkgs_on_deb_branch
+  else
+    echo "could not find branch debian for $dir"
+    echo "$dir" >> ../pkgs_no_deb_branch
+  fi
+  cd ..
+done
+
+# for all the submodules that do not have a debian branch
+# generate a new branch specific to the new dist based
+# off the dist passed as $2. Then modify the changelog
+# to reflect the new dist
+
+while read line ; do
+  cd "$line"/
+  git co "${2}"
+  git co -b "${1}"
+  dists="{$1}"
+  update_log "${dists}" 
+  commit
+  cd ..
+done < pkgs_no_deb_branch 
+
+# for all submodules on a debian branch, check if the changelog
+# already contains an entry for the new dist. if not update the changelog
+# to add new dist
+
+while read line ; do
+  cd "$line"/debian
+  cat changelog | grep "{$1}"
+  if [ $? -eq 1 ] ; then
+    dists="lenny lucid squeeze $1"
+    update_log "${dists}"
+  else
+    echo "$line already has a changelog entry for '{$1}'"
+  fi
+  cd ..
+  commit
+  cd ..
+done < pkgs_on_deb_branch
+
+
+
