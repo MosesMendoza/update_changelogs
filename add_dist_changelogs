@@ -44,7 +44,6 @@ error(){
 # args:
 # 1. branch to check checkout
 switch_to_branch(){
-  #echo "Switching to branch $1"
   if (`branch_exists $1`) ; then  
     git checkout upstream
     git checkout $1
@@ -79,16 +78,14 @@ branch_exists(){
 # modify changelog.
 
 for dir in `ls -d */` ; do
-  echo "current directory:"
   echo `pwd`
   cd $dir
-  echo "Checking submodule $dir"
   git reset --hard
   switch_to_branch "debian"
   if [ $? -eq 0 ] ; then
     if (`branch_exists "${BASE_DIST}"`) ; then
       cd ..
-      error "{$dir}" "Both debian and '${BASE_DIST}' branches exist"
+      error "${dir}" "Both debian and '${BASE_DIST}' branches exist. Ignoring '${dir}'"
     else
       # update log
       git pull origin debian
@@ -96,7 +93,6 @@ for dir in `ls -d */` ; do
       cat changelog | grep "$NEW_DIST"
       if [ $? -eq 1 ] ; then
         dists="lenny lucid squeeze $NEW_DIST"
-        echo "updating log with $dists"
         update_log "${dists}"
         cd ..
         commit
@@ -118,11 +114,10 @@ for dir in `ls -d */` ; do
         if [ $? -eq 0 ] ; then
           cd debian
           dists="${NEW_DIST}"
-          echo "Updating log with $dists"
           update_log "${dists}"
           cd ..
           commit
-          # git push "origin" '${NEW_DIST}'
+          echo git push "origin" '${NEW_DIST}'
         else
           cd ..
           error "${dir}" "git checkout -b failed. Unable to create new branch '${NEW_DIST}'"
@@ -131,7 +126,6 @@ for dir in `ls -d */` ; do
         cd ..
         error "${dir}" "git checkout failed. Unabled to switch to base branch '${BASE_DIST}'"
       fi
-      #cd ..
     fi
   fi
 done
