@@ -100,15 +100,15 @@ for dir in `ls -d */` ; do
       commit
       #git push origin debian
       fi
+      cd ..
     fi
-    cd ..
   else
     # check for new dist branch. If none, switch to dist-specific branch, make new branch, update log
     if (`branch_exists $NEW_DIST`) ; then
       echo "Branch '${NEW_DIST}' already exists for '${dir}'"
       cd ..
     else
-      if (`switch_to_branch $BASE_DIST`) ; then
+if (`switch_to_branch $BASE_DIST`) ; then
         git reset --hard
         git pull origin "${BASE_DIST}"
         git checkout -b "${NEW_DIST}"
