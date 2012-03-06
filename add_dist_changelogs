@@ -65,7 +65,7 @@ switch_to_branch(){
 # args
 # 1. the branch to check for
 branch_exists(){
-  git branch -a | grep -m $1 >/dev/null 2>&1
+  git branch -a | grep $1 >/dev/null 2>&1
   if [ $? -eq 0 ] ; then
     return 0
   else
