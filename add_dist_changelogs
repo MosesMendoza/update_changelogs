@@ -85,7 +85,7 @@ for dir in `ls -d */` ; do
   if [ $? -eq 0 ] ; then
     if (`branch_exists "${BASE_DIST}"`) ; then
       cd ..
-      error "${dir}" "BOTH debian and '${BASE_DIST}' branches exist."
+      error "${dir}" "BOTH debian and $BASE_DIST branches exist."
     else
       # update log
       git pull origin debian
@@ -105,7 +105,7 @@ for dir in `ls -d */` ; do
   else
     # check for new dist branch. If none, switch to dist-specific branch, make new branch, update log
     if (`branch_exists "${NEW_DIST}"`) ; then
-      echo "Branch $NEW_DIST already exists for '${dir}'"
+      echo "Branch $NEW_DIST already exists for $dir"
       cd ..
     else
       if (`switch_to_branch "${BASE_DIST}"`) ; then
