@@ -73,7 +73,7 @@ branch_exists(){
     return 0
   fi
 }
-
+#
 # On all modules, try to switch to a debian branch. Check if a dist-specific branch
 # e.g. squeeze also exists. Error if both exist. Otherwise check changelog for new dist. If
 # exists, don't update. Otherwise, update. If no debian branch exists, try switch
