@@ -26,7 +26,7 @@ update_log(){
 # add the changelogs and commit the changes
 commit(){
   git add debian/changelog
-  git checkoutmmit -a -m "Update debian/changelog"
+  git commit -a -m "Update debian/changelog"
 }
 
 # error routine
@@ -49,7 +49,7 @@ switch_to_branch(){
   git checkout upstream
   git checkout $1
   branch=`git branch | grep \* | awk '{print $NF}'`
-  if [ branch = $1 ] ; then
+  if [ $branch = $1 ] ; then
     return 0
   else
     return 1
@@ -88,7 +88,7 @@ for dir in `ls -d */` ; do
       git reset --hard
       git pull origin debian
       cd debian
-      cat changelog | grep "${NEW_DIST}"
+      cat changelog | grep "$NEW_DIST"
       if [ $? -eq 1 ] ; then
         dists="lenny lucid squeeze '${NEW_DIST}'"
         update_log "${dists}"
