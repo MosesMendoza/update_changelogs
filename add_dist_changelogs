@@ -81,6 +81,7 @@ for dir in "${MODULE_DIRS}" ; do
   switch_to_branch "debian"
   if [ $? -eq 0 ] ; then
     if (`branch_exists '${BASE_DIST}'`) ; then
+      cd ..
       error "{$dir}" "Both debian and '${BASE_DIST}' branches exist"
     else
       # update log
@@ -98,10 +99,12 @@ for dir in "${MODULE_DIRS}" ; do
       #git push origin debian
       fi
     fi
+    cd ..
   else
     # check for new dist branch. If none, switch to dist-specific branch, make new branch, update log
     if (`branch_exists '${NEW_DIST}'`) ; then
       echo "Branch '${NEW_DIST}' already exists for '${dir}'"
+      cd ..
     else
       if (`switch_to_branch "${BASE_DIST}"`) ; then
         git reset --hard
@@ -115,14 +118,15 @@ for dir in "${MODULE_DIRS}" ; do
           cd ..
           # git push "origin" '${NEW_DIST}'
         else
+          cd ..
           error "${dir}" "git checkout -b failed. Unable to create new branch '${NEW_DIST}'"
         fi
       else
+        cd ..
         error "${dir}" "git checkout failed. Unabled to switch to base branch '${BASE_DIST}'"
       fi
     fi
   fi
-  cd ..
 done
 
 
