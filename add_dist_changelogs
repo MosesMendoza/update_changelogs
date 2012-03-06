@@ -10,8 +10,8 @@
 
 MODULE_DIRS=`ls -d */`
 ERROR_LOG="submodule_errors"
-NEW_DIST='${1}'
-BASE_DIST='${2}'
+NEW_DIST="${1}"
+BASE_DIST="${2}"
 
 # update a changelog
 # arguments:
@@ -34,7 +34,7 @@ commit(){
 # 1. submodule with error
 # 2. error string to write
 error(){
-  echo "ERROR '{2}' occurred on '${1}'. Wrote to '${ERROR_LOG}'"
+  echo "ERROR '${2}' occurred on '${1}'. Wrote to '${ERROR_LOG}'"
   echo "ERROR '${1}' '{2}'" >> '${ERROR_LOG}'
 }
 
@@ -46,9 +46,9 @@ error(){
 # 1. branch to check checkout
 switch_to_branch(){
   git checkout upstream
-  git checkout '${1}'
+  git checkout $1
   branch=`git branch | grep \* | awk '{print $NF}'`
-  if [ $ branch = "$1" ] ; then
+  if [ branch = $1 ] ; then
     return 0
   else
     return 1
@@ -60,7 +60,7 @@ switch_to_branch(){
 # args
 # 1. the branch to check for
 branch_exists(){
-  exists=`git branch -a | grep '${1}' | cut -d '/' -f 3`
+  exists=`git branch -a | grep "${1}" | cut -d '/' -f 3`
   if [ -z $exists ] ; then
     return 1
   else
