@@ -19,7 +19,7 @@ BASE_DIST="${2}"
 update_log(){
   message=`git log --oneline --no-merges -n1 --no-decorate --no-color --format="%s"`  
   dist=$1
-  dch --check-dirname-level 0 --force-distribution -D "${dist}" -l puppet $message >/dev/null
+  dch --check-dirname-level 0 --force-distribution -D "${dist}" -l puppet $message >/dev/null 2>&1
 }
 
 # add the changelogs and commit the changes
