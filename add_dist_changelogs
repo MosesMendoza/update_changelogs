@@ -78,14 +78,14 @@ branch_exists(){
 # modify changelog.
 
 for dir in `ls -d */` ; do
-  echo `pwd`
   cd $dir
+  echo `pwd`
   git reset --hard
   switch_to_branch "debian"
   if [ $? -eq 0 ] ; then
     if (`branch_exists "${BASE_DIST}"`) ; then
       cd ..
-      error "${dir}" "Both debian and '${BASE_DIST}' branches exist. Ignoring '${dir}'"
+      error "${dir}" "BOTH debian and '${BASE_DIST}' branches exist."
     else
       # update log
       git pull origin debian
