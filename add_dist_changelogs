@@ -132,7 +132,8 @@ for dir in `ls -d */` ; do
 done
 
 if [ -e submodule_errors ] ; then
-  echo "\n************* REVIEW submodule_errors file for any submodules requiring manual action.**************"
+  echo \n"Complete"
+  echo \n"************* REVIEW submodule_errors file for any submodules requiring manual action.**************"
 fi
 
 
