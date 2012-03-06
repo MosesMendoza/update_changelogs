@@ -108,9 +108,11 @@ for dir in "${MODULE_DIRS}" ; do
         git pull origin "${BASE_DIST}"
         git checkout -b "${NEW_DIST}"
         if [ $? -eq 0 ] ; then
+          cd debian
           dists="${NEW_DIST}"
           update_log "${dists}"
           commit
+          cd ..
           # git push "origin" '${NEW_DIST}'
         else
           error "${dir}" "git checkout -b failed. Unable to create new branch '${NEW_DIST}'"
@@ -120,6 +122,7 @@ for dir in "${MODULE_DIRS}" ; do
       fi
     fi
   fi
+  cd ..
 done
 
 
