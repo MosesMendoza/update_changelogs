@@ -1,7 +1,8 @@
 #/bin/sh
  
 # script to update changelogs in submodules
-# to include a new distribution
+# to include a new distribution. Run from the 
+# packaging/deb directory
 # arguments:
 # 1. the name of the new dist, e.g. precise
 # 2. the name of the branch off which to base new branch-specific builds
