@@ -7,6 +7,12 @@
 # 1. the name of the new dist, e.g. precise
 # 2. the name of the branch off which to base new branch-specific builds
 
+
+MODULE_DIRS=`ls -d */`
+ERROR_LOG="submodule_errors"
+NEW_DIST='${1}'
+BASE_DIST='${2}'
+
 # update a changelog
 # arguments:
 # 1. the dists string to add to the log
@@ -23,63 +29,91 @@ commit(){
   git commit -a -m "Update debian/changelog"
 }
 
-# first, get all submodules onto the debian branch, if they have one
-# make lists of submodules on the debian branch, and those without one
-module_dirs=`ls -d */`
-for dir in $module_dirs ; do
+
+# error routine
+# 1. submodule with error
+# 2. error string to write
+error(){
+  echo "ERROR '{2}' occurred on '${1}'. Wrote to '${ERROR_LOG}'"
+  echo "ERROR '${1}' '{2}'" >> '${ERROR_LOG}'
+}
+
+# check if a git branch exists for submodule. Switch
+# to upstream first to avoid file/branch ambiguity on
+# debian branches
+# arg:
+# 1. branch to check checkout
+# returns 1 if branch does not exist or error occurred
+switch_to_branch(){
+  git checkout upstream
+  git checkout '${1}' >/dev/null 2>&1
+  branch=`git branch | grep \* | awk '{print $NF}'`
+  if [ $ branch = "$1" ] ; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# check if git branch exists
+# if exists, return 0. Else return 1
+# args
+# 1. the branch to check for
+branch_exists(){
+  exists=`git branch -a | grep '${1}' | cut -d '/' -f 3`
+  if [ -z $exists ] ; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+# On all modules, try to switch to a debian branch. Check if a dist-specific branch
+# e.g. squeeze also exists. Error if both exist. Otherwise check changelog for new dist. If
+# exists, don't update. Otherwise, update. If no debian branch exists, try switch
+# to dist-specific branch, $2. Create a new branch for new dist, $1. Once on new branch
+# modify changelog.
+
+for dir in "${MODULE_DIRS}" ; do
   cd $dir
   git reset --hard
-  git co upstream
-  git co debian
-  branch=`git branch | grep \* | awk '{print $NF}'`
-  if [ $branch = "debian" ] ; then
-    echo "$dir moved to branch $branch"
-    echo "$dir" >> ../pkgs_on_deb_branch
+  switch_to_branch "debian"
+  if [ $? -eq 0 ] ; then
+    if (`branch_exists '${BASE_DIST}'`)
+      error "{$dir}" "Both debian and '${BASE_DIST}' branches exist"
+    else
+      # update log
+      cd debian
+      cat changelog | grep "${NEW_DIST}"
+      if [ $? -eq 1 ] ; then
+        dists="lenny lucid squeeze '${NEW_DIST}'"
+        update_log "${dists}"
+      else
+        echo "'${NEW_DIST}' already in changelog for '${dir}'"
+      cd ..
+      commit
+      #git push origin debian
+      fi
+    fi
   else
-    echo "could not find branch debian for $dir"
-    echo "$dir" >> ../pkgs_no_deb_branch
+    # check for new dist branch. If none, switch to dist-specific branch, make new branch, update log
+    if (`branch_exists '${NEW_DIST}'`) ; then
+      echo "Branch '${NEW_DIST}' already exists for '${dir}'"
+    else
+      if (`switch_to_branch "${BASE_DIST}"`) ; then
+        git co -b "${NEW_DIST}"
+        if [ $? -eq 0 ] ; then
+          dists="${NEW_DIST}"
+          update_log "${dists}"
+          commit
+          # git push "origin" '${NEW_DIST}'
+        else
+          error "${dir}" "git co -b failed. Unable to create new branch '${NEW_DIST}'"
+        fi
+      else
+        error "${dir}" "git co failed. Unabled to switch to base branch '${BASE_DIST}'"
+      fi
+    fi
   fi
-  cd ..
-done
-
-# for all the submodules that do not have a debian branch
-# generate a new branch specific to the new dist based
-# off the dist passed as $2. Then modify the changelog
-# to reflect the new dist
-
-while read line ; do
-  cd "$line"/
-  git co "${2}"
-  # before making a new branch, make sure the switch was successful
-  branch=`git branch | grep \* | awk '{print $NF}'`
-  if [ $branch = "$2" ] ; then
-    git co -b "${1}"
-    dists="{$1}"
-    update_log "${dists}" 
-    commit
-  else
-    echo "Unable to switch '${line}' to branch '${1}'. Make sure branch exists."
-  fi
-  cd ..
-done < pkgs_no_deb_branch 
-
-# for all submodules on a debian branch, check if the changelog
-# already contains an entry for the new dist. if not update the changelog
-# to add new dist
-
-while read line ; do
-  cd "$line"/debian
-  cat changelog | grep "{$1}"
-  if [ $? -eq 1 ] ; then
-    dists="lenny lucid squeeze $1"
-    update_log "${dists}"
-  else
-    echo "$line already has a changelog entry for '{$1}'"
-  fi
-  cd ..
-  commit
-  cd ..
-done < pkgs_on_deb_branch
-
 
 
