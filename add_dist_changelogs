@@ -46,7 +46,7 @@ error(){
 # 1. branch to check checkout
 switch_to_branch(){
   git checkout upstream
-  git checkout '${1}' >/dev/null 2>&1
+  git checkout '${1}'
   branch=`git branch | grep \* | awk '{print $NF}'`
   if [ $ branch = "$1" ] ; then
     return 0
