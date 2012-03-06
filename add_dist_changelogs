@@ -67,7 +67,6 @@ switch_to_branch(){
 # 1. the branch to check for
 branch_exists(){
   exists=`git branch -a | grep "${1}" | cut -d '/' -f 3`
-  echo "exists: $exists"
   if [ -z $exists ] ; then
     return 1
   else
@@ -134,7 +133,7 @@ for dir in `ls -d */` ; do
         cd ..
         error "${dir}" "git checkout failed. Unabled to switch to base branch '${BASE_DIST}'"
       fi
-      cd ..
+      #cd ..
     fi
   fi
 done
