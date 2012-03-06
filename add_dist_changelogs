@@ -67,6 +67,7 @@ switch_to_branch(){
 # 1. the branch to check for
 branch_exists(){
   exists=`git branch -a | grep "${1}" | cut -d '/' -f 3`
+  echo $exists
   if [ -z $exists ] ; then
     return 1
   else
@@ -111,7 +112,7 @@ for dir in `ls -d */` ; do
   else
     # check for new dist branch. If none, switch to dist-specific branch, make new branch, update log
     if (`branch_exists $NEW_DIST`) ; then
-      echo "Branch '${NEW_DIST}' already exists for '${dir}'"
+      echo "Branch $NEW_DIST already exists for '${dir}'"
       cd ..
     else
       if (`switch_to_branch $BASE_DIST`) ; then
