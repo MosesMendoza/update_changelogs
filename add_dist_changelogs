@@ -96,6 +96,7 @@ for dir in `ls -d */` ; do
         update_log "${dists}"
         cd ..
         commit
+        echo git push "origin" $NEW_DIST
       else
         echo "'${NEW_DIST}' already in changelog for '${dir}'"
         cd ..
@@ -117,7 +118,7 @@ for dir in `ls -d */` ; do
           update_log "${dists}"
           cd ..
           commit
-          echo git push "origin" '${NEW_DIST}'
+          echo git push "origin" NEW_DIST
         else
           cd ..
           error "${dir}" "git checkout -b failed. Unable to create new branch '${NEW_DIST}'"
