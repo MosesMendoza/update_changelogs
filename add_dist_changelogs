@@ -137,6 +137,3 @@ if [ -e submodule_errors ] ; then
   echo -e "\nComplete"
   echo -e "\n************* REVIEW submodule_errors file for any submodules requiring manual action.**************"
 fi
-
-
-
