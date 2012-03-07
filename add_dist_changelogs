@@ -7,13 +7,12 @@
 # 1. the name of the new dist, e.g. precise
 # 2. the name of the branch off which to base new branch-specific builds
 
-MODULE_DIRS=`ls -d */`
 ERROR_LOG="submodule_errors"
 NEW_DIST="${1}"
 BASE_DIST="${2}"
 
 # update a changelog
-# arguments:
+# args:
 # 1. the dists string to add to the log
 
 update_log(){
@@ -33,8 +32,8 @@ commit(){
 # 1. submodule with error
 # 2. error string to write
 error(){
-  echo "ERROR ${2} occurred on ${1}. Wrote to ${ERROR_LOG}"
-  echo "ERROR ${1} ${2}" >> ${ERROR_LOG}
+  echo "ERROR ${2} occurred on ${1}. Writing to ${ERROR_LOG}"
+  echo "ERROR ${1} ${2}" >> $ERROR_LOG
 }
 
 # check if a git branch exists for submodule. Switch
@@ -72,10 +71,13 @@ branch_exists(){
   fi
 }
 
-# e.g. squeeze also exists. Error if both exist. Otherwise check changelog for new dist. If
-# exists, don't update. Otherwise, update. If no debian branch exists, try switch
-# to dist-specific branch, $2. Create a new branch for new dist, $1. Once on new branch
-# modify changelog.
+# For all submodules, switch to debian branch. If it exists also check if base 
+# dist-specific branch, e.g. squeeze, exists. Error if both exist. Otherwise 
+# check changelog for reference to new dist. If exists, don't update changelog. 
+# Otherwise, update. If no debian branch exists, try to switch to base 
+# dist-specific branch, e.g. arg $2. Create a new branch for new dist, e.g. arg
+# $1 off this. Once on new branch modify changelog. Prior to git operations do 
+# reset --hard and git pull to ensure latest files.
 
 for dir in `ls -d */` ; do
   cd $dir
@@ -96,7 +98,7 @@ for dir in `ls -d */` ; do
         update_log "${dists}"
         cd ..
         commit
-        echo git push "origin" "debian" 
+        git push "origin" "debian" 
       else
         echo "'${NEW_DIST}' already in changelog for '${dir}'"
         cd ..
@@ -118,7 +120,7 @@ for dir in `ls -d */` ; do
           update_log "${dists}"
           cd ..
           commit
-          echo git push "origin" NEW_DIST
+          git push "origin" NEW_DIST
         else
           cd ..
           error "${dir}" "git checkout -b failed. Unable to create new branch '${NEW_DIST}'"
